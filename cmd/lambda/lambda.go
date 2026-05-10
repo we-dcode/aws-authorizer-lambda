@@ -39,6 +39,11 @@ func handler(ctx context.Context, request events.APIGatewayCustomAuthorizerReque
 		return DenyPermission(request.MethodArn), fmt.Errorf("unauthorized: Missing Authorization Token")
 	}
 
+	// Strip "Bearer " prefix if present
+	if len(token) > 7 && token[:7] == "Bearer " {
+		token = token[7:]
+	}
+
 	identityServer := os.Getenv("IDENTITY_SERVER_URL")
 	if identityServer == "" {
 		return DenyPermission(request.MethodArn), fmt.Errorf("IDENTITY_SERVER_URL not set")
