@@ -56,6 +56,14 @@ func handler(ctx context.Context, request events.APIGatewayCustomAuthorizerReque
 		return DenyPermission(request.MethodArn), err
 	}
 
+	allowedEmail := os.Getenv("ALLOWED_EMAIL")
+	if allowedEmail != "" {
+		tokenEmail, _ := claims["email"].(string)
+		if tokenEmail != allowedEmail {
+			return DenyPermission(request.MethodArn), fmt.Errorf("unauthorized: email '%s' does not match allowed email", tokenEmail)
+		}
+	}
+
 	authResponse := events.APIGatewayCustomAuthorizerResponse{
 		PrincipalID: fmt.Sprintf("%v", claims["sub"]),
 		PolicyDocument: events.APIGatewayCustomAuthorizerPolicy{
